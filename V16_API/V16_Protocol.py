@@ -226,7 +226,7 @@ class V16_Protocol:
 
     def set_ptt(self, enabled=False):
         if self.stream.is_open:
-            return self.send_command(0x11,[enabled,0x00])
+            return self.send_command(0x11,[enabled])
         return False
 
     def set_squelch(self, squelch):
@@ -257,8 +257,8 @@ if __name__ == "__main__":
     V16.send_command(0x08,[0x01])
     V16.set_scan(False)
     V16.set_squelch(16)
-    V16.set_frequency_MHz(135.0, primary=True)
-    V16.set_frequency_MHz(119.9)
+    V16.set_frequency_MHz(119.1, primary=True)
+    V16.set_frequency_MHz(119.1)
 
     while True:
        

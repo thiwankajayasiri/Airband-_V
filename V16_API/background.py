@@ -58,11 +58,10 @@ def background_process(commands, results, queries):
         # Make sure we're connected and update state from the radio
         if V16.connect():
             real_state = V16.update_real_state(real_state)
-
+	    V16.set_ptt(ptt_enabled)
         # Fill in the state information for properties of the background task
         real_state.Connected = V16.stream.is_open
         real_state.PTTEnabled = ptt_enabled
-        #real_state.ScanE0nabled = scan_enabled
 
 
         # Put the updated state in the queue
@@ -87,7 +86,7 @@ def set_camera(cam_id):
             return
         os.environ['INSEL'] = str(cam_id)
         subprocess.call('pwd')
-        video_set_reg = subprocess.call(['sh','./V16_API/update_cam.sh'])
+        video_set_reg = subprocess.call(['sh','/root/V16-API/V16_API/update_cam.sh'])
     except Exception as E:
         print("Camera Set Failed:", e)
 
