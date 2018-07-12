@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+
+{% block head %}
+    {{super()}}
+
+    <link rel="stylesheet" href="/static/bootstrap-toggle.min.css" />
+    <script src="static/bootstrap-toggle.min.js"></script>
+
+    <style>
+        #map{
+                height: 400px;
+            }
+    </style>
+
+
+
+{% endblock %}
+
+{% block content %}
+    {{util.flashed_messages(dismissible=True)}}
+    
+    <div class="container">
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">Radio Control</div>
+                <div class="panel-body">
+                    <div class="well">
+                        <div class="row justify-content-center">
+                            <div class="col col-sm-4">
+                                <label for="primary_freq">ACTIVE (MHZ)</label>
+                                <div class="input-group number-spinner" id='squelchspinner'>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+                                    </span>
+                                    <input type="text" class="form-control text-center" value="117.1">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                 <label for="btn-group">SWAP/SCAN</label>
+                                  <div class="btn-group btn-group-justified" role="group">
+                                      <div class="btn-group" role="group">
+                                          <button type="button btn-primary" class="btn" id="swap"><span class="glyphicon glyphicon-random"></span></button>
+                                      </div>
+                                      <div class="btn-group" role="group">
+                                          <button type="button btn-primary" class="btn" id="scan">SCAN</button>
+                                      </div>
+                                  </div>
+                              </div>
+                            <div class="col col-sm-4">
+                                <label for="standby_freq">STANDBY (MHZ)</label>
+                                <div class="input-group number-spinner" id='squelchspinner'>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+                                    </span>
+                                    <input type="text" class="form-control text-center" value="117.1">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                  </div>
+                  <div class="well">
+                      <div class="row justify-content-center">
+                          <div class="col col-sm-4">
+                              <button type="button" class="btn btn-secondary btn-lg btn-block" id="PTT">PTT</button>
+                          </div>
+                          <div class="col col-sm-4">
+                              <label for="squelchspinner">SQUELCH</label>
+                              <div class="input-group number-spinner" id='squelchspinner'>
+                                  <span class="input-group-btn">
+                                      <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+                                  </span>
+                                  <input type="text" class="form-control text-center" value="1">
+                                  <span class="input-group-btn">
+                                      <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+                                  </span>
+                              </div>
+                          </div>
+                          <div class="col col-sm-4">
+                              <button type="button" class="btn btn-secondary btn-lg btn-block" id='replay'>REPLAY</button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">Radio Status</div>
+                <div class="panel-body">
+                    <div class="well">
+                        Status here
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">Video Control</div>
+                <div class="panel-body">
+                    <div class="well">
+                        Status here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var global_status;
+            setInterval(function(){
+                $.ajax({
+                    async: true,
+                    url: "/status",
+                    success: function(data) {
+                                global_status = JSON.parse(data)
+                            }
+                });
+            }, 250);
+            
+            setInterval(function(){
+                console.log(global_status);
+                if (global_status.PTTEnabled) {
+                    $("#PTT").addClass("active").addClass("btn-success");
+                } else {
+                    $("#PTT").removeClass("active").removeClass("btn-success");
+                }
+                if (global_status.ScanEnabled) {
+                    $("#scan").addClass("active").addClass("btn-success");
+                } else {
+                    $("#scan").removeClass("active").removeClass("btn-success");
+                }
+            }, 250);
+        
+            $("#PTT").click(function (event) {
+                $.post(
+                    "commands",
+                    JSON.stringify({
+                                    parameter: "PTT",
+                                    value: !global_status.PTTEnabled
+                                   })
+                );
+             });
+             
+             $("#scan").click(function (event) {
+                 $.post(
+                     "commands",
+                     JSON.stringify({
+                                     parameter: "SCAN",
+                                     value: !global_status.ScanEnabled
+                                    })
+                 );
+              });
+              
+              $("#replay").click(function (event) {
+                  $.post(
+                      "commands",
+                      JSON.stringify({
+                                      parameter: "PLAYBACK",
+                                      value: 0
+                                     })
+                  );
+               });
+               
+               $("#swap").click(function (event) {
+                   $.post(
+                       "commands",
+                       JSON.stringify({
+                                       parameter: "SWAP",
+                                       value: 0
+                                      })
+                   );
+                });
+
+        })
+    </script>
+
+{% endblock %}
