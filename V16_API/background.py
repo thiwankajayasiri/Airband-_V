@@ -1,8 +1,9 @@
 from V16_API.QueueManager import V16_State
 from V16_API.logsetup import logger
-from queue import Full, Empty
+from Queue import Full, Empty
 from time import sleep, time
 from threading import Thread
+import subprocess, os
 
 
 def background_process(commands, results, queries):
@@ -20,8 +21,11 @@ def background_process(commands, results, queries):
             except Empty:
                 current_command = None 
                 
-            if current_command is not None        :
-                if current_command.parameter == "PTT":
+            if current_command is not None:
+                if current_command.parameter == "CAM":
+                    set_camera(current_command.value)
+                    current_command.success = True
+                elif current_command.parameter == "PTT":
                     desired_state.PTTEnabled = current_command.value 
                     current_command.success = True
                 elif current_command.parameter == "SCAN":
@@ -47,3 +51,13 @@ def background_process(commands, results, queries):
         else:
             print(wait)
             logger.warning('Critical task time overrun')
+
+def set_camera(cam_id):
+    if not isinstance(cam_id, int):
+        return
+    os.environ['INSEL'] = str(cam_id)
+    subprocess.call('pwd')
+    video_set_reg = subprocess.call(['sh','./V16_API/update_cam.sh'])
+
+    
+        
