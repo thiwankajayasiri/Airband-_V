@@ -1,9 +1,10 @@
-import serial, time
-from serial import SerialException
+from __future__ import print_function
+import serial, time, binascii
+
 
 HOST = "198.18.15.41" 
 PORT = "20202" # Wave Relay Default
-URL = "rfc2217://" + HOST + ":" + PORT +"[?logging=debug]"
+URL = "rfc2217://" + HOST + ":" + PORT +"?logging=error"
 
 HEADER = [0x02,0x05]
 
@@ -11,7 +12,33 @@ HEADER = [0x02,0x05]
 class V16_Protocol:
     def __init__(self):
         self.stream = serial.serial_for_url(URL, do_not_open=True)
-        self.stream.baudrate = 115200
+        self.stream.baudrate = 9600
+        
+        # status fields from radio
+        self.tx_active = False
+        self.scan_active = False
+        self.rx_active = False
+        self.rx_stby = False
+        self.stuck_ptt = False
+        self.fault = False
+        self.part_shutdown = False
+        self.err_thermal = False
+        self.err_voltage = False
+        self.err_antenna = False
+        self.rx_volume = 0
+        self.int_volume = 0
+        self.squelch = 0
+        self.freq_active = 127.0
+        self.freq_stdby = 127.0
+        self.tx_powert = 0
+        self.vswr = 0
+        self.active_rx_db = 0
+        self.stdby_rx_db = 0
+        self.tx_mod = 0
+        self.temp = 0
+        self.volts = 0
+        
+        
         
     def connect(self):
         if self.stream.is_open:
@@ -19,8 +46,8 @@ class V16_Protocol:
             
         try:
             self.stream.open()
-        except Exception:
-            print('Failed to connect')
+        except Exception as e:
+            print('Failed to connect\n', e)
             return False
         
         return self.stream.is_open
@@ -39,7 +66,7 @@ class V16_Protocol:
         lrc = msg[2]
         for b in msg[3:]:
             lrc ^= b
-        #lrc ^= 0x55
+        lrc ^= 0x55
         lrc = bytearray([lrc])
         msg = msg + lrc
         return msg
@@ -50,11 +77,10 @@ class V16_Protocol:
         msg = self.pack_message(command, data)
         if msg is None:
             return False
-        #self.stream.write(msg)
+        #print(binascii.hexlify(msg).decode("ascii"))
+        self.stream.write(msg)
         return True
         
-    def receive_ack(self):
-        return True
         
     def set_frequency_MHz(self, freq_MHz, primary=False):
         '''
@@ -78,9 +104,54 @@ class V16_Protocol:
         freq = int(int(freq/25)*25)
         rounded_cents = int(freq/100) * 100
         quadracent_code = int(float(freq % 100) / 25 * 4)
-        code_decimal = rounded_cents + quadracent_code
+        code_decimal = int(rounded_cents + quadracent_code)
+        #print(code_decimal)
         code_bytes = int_to_bytes(code_decimal,4)
-        return code_bytes
+        code_bytes_little = list(reversed(code_bytes))
+        return code_bytes_little
+        
+    def read_status(self):
+        bufsize = self.stream.in_waiting
+        if bufsize < 0:
+            return False
+            
+        # clear out old status messages
+        if bufsize > 48:
+            # status message = 24 Bytes
+            self.stream.read(bufsize-48)
+            bufsize = self.stream.in_waiting
+        
+        # Look for start
+        for i in range(0,bufsize-24):
+            incoming = V16.stream.read(1)
+            if incoming.encode("hex") == "02":
+                incoming = V16.stream.read(2)
+                if incoming.encode("hex") == "0504":
+                    break
+        # No header found in serial buffer
+        else:
+            return False
+            
+        # Read body and verify checksum
+        incoming = V16.stream.read(20)
+        data = bytearray(incoming)
+        print(data)
+        lrc = data[0]
+        for b in data[1:]:
+            lrc ^= b
+        lrc ^= 0x55
+        received_lrc = V16.stream.read(1)
+        
+        # Fail out if checksum was invalid
+        if lrc != ord(received_lrc[0]):
+            return False
+            
+        # Deserialize data
+        print(bin(data[0]))
+        status_bitmask = [bool((data[0] >> bit) & 1) for bit in range(0, 7)]
+        #[self.tx_active,self.scan_active,self.rx_active,self.rx_stby,self.stuck_ptt] = status_bitmask
+        print(status_bitmask)
+            
         
         
 def int_to_bytes(val, num_bytes):
@@ -88,13 +159,16 @@ def int_to_bytes(val, num_bytes):
         
     
 if __name__ == "__main__":
-    print(URL)
     V16 = V16_Protocol()
     while not V16.connect():
         time.sleep(1)
-        print("Connecting")
-    V16.set_frequency_MHz(127.0)
-    print(V16.stream.read(1))
-    #V16.pack_message(0x01,[0x18,0xF0,0x01,0x00])
+        print("Attempting Connection")
+    print("Connection Successful")
+    while True:
+        V16.send_command(0x08,[0x01])
+        V16.set_frequency_MHz(127.0)
+        time.sleep(1)
+        V16.read_status()
+        print('')
     
     
