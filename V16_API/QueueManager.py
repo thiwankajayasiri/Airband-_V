@@ -33,6 +33,7 @@ class V16_State:
         self.success = "Hello World"
         self.PTTEnabled = False
         self.ScanEnabled = False
+        self.PrimaryFreq = 128.0
         pass 
 
     def is_valid_state(self):

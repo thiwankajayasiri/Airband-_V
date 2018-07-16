@@ -7,16 +7,13 @@
 {% block head %}
     {{super()}}
 
-    <link rel="stylesheet" href="/static/bootstrap-toggle.min.css" />
-    <script src="static/bootstrap-toggle.min.js"></script>
-
     <style>
         #map{
                 height: 400px;
             }
     </style>
 
-
+<script type="text/javascript" src="/static/control.js"></script>
 
 {% endblock %}
 
@@ -32,13 +29,13 @@
                         <div class="row justify-content-center">
                             <div class="col col-sm-4">
                                 <label for="primary_freq">ACTIVE (MHZ)</label>
-                                <div class="input-group number-spinner" id='squelchspinner'>
+                                <div class="input-group">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-refresh"></span></button>
+                                        <button class="btn btn-default" id="primary_refresh"><span class="glyphicon glyphicon-refresh"></span></button>
                                     </span>
-                                    <input type="text" class="form-control text-center" value="117.1">
+                                    <input type="text" class="form-control text-center" value="127.0" id="primary_input">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-ok"></span></button>
+                                        <button class="btn btn-default" id="primary_submit"><span class="glyphicon glyphicon-ok"></span></button>
                                     </span>
                                 </div>
                             </div>
@@ -55,13 +52,13 @@
                               </div>
                             <div class="col col-sm-4">
                                 <label for="standby_freq">STANDBY (MHZ)</label>
-                                <div class="input-group number-spinner" id='squelchspinner'>
+                                <div class="input-group">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-refresh"></span></button>
+                                        <button class="btn btn-default" id="standby_refresh"><span class="glyphicon glyphicon-refresh"></span></button>
                                     </span>
-                                    <input type="text" class="form-control text-center" value="117.1">
+                                    <input type="text" class="form-control text-center" value="127.0" id="standby_input">
                                     <span class="input-group-btn">
-                                        <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-ok"></span></button>
+                                        <button class="btn btn-default" id="standby_submit"><span class="glyphicon glyphicon-ok"></span></button>
                                     </span>
                                 </div>
                             </div>
@@ -114,97 +111,5 @@
         </div>
     </div>
         
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            var global_status;
-            setInterval(function(){
-                $.ajax({
-                    async: true,
-                    url: "/status",
-                    success: function(data) {
-                                global_status = JSON.parse(data)
-                            }
-                });
-            }, 250);
-            
-            setInterval(function(){
-                console.log(global_status);
-                if (global_status.PTTEnabled) {
-                    $("#PTT").addClass("active").addClass("btn-success");
-                } else {
-                    $("#PTT").removeClass("active").removeClass("btn-success");
-                }
-                if (global_status.ScanEnabled) {
-                    $("#scan").addClass("active").addClass("btn-success");
-                } else {
-                    $("#scan").removeClass("active").removeClass("btn-success");
-                }
-            }, 250);
-        
-            $("#PTT").click(function (event) {
-                $.post(
-                    "commands",
-                    JSON.stringify({
-                                    parameter: "PTT",
-                                    value: !global_status.PTTEnabled
-                                   })
-                );
-             });
-             
-             $("#scan").click(function (event) {
-                 $.post(
-                     "commands",
-                     JSON.stringify({
-                                     parameter: "SCAN",
-                                     value: !global_status.ScanEnabled
-                                    })
-                 );
-              });
-              
-              $("#replay").click(function (event) {
-                  $.post(
-                      "commands",
-                      JSON.stringify({
-                                      parameter: "PLAYBACK",
-                                      value: 0
-                                     })
-                  );
-               });
-               
-               $("#swap").click(function (event) {
-                   $.post(
-                       "commands",
-                       JSON.stringify({
-                                       parameter: "SWAP",
-                                       value: 0
-                                      })
-                   );
-                });
-                $("#nose").click(function (event) {
-                    $("#nose").addClass("active");
-                    $("#down").removeClass("active");
-                    $.post(
-                        "commands",
-                        JSON.stringify({
-                                        parameter: "CAM",
-                                        value: 0
-                                       })
-                    );
-                 });
-                 $("#down").click(function (event) {
-                     $("#down").addClass("active");
-                     $("#nose").removeClass("active");
-                     $.post(
-                         "commands",
-                         JSON.stringify({
-                                         parameter: "CAM",
-                                         value: 3
-                                        })
-                     );
-                  });
-
-        })
-    </script>
 
 {% endblock %}
