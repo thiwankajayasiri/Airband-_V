@@ -1,4 +1,4 @@
-from V16_API import app, V16
+from V16_API import app, background_interface
 from V16_API.QueueManager import command_ack
 import time
 
@@ -12,11 +12,11 @@ def index():
 
 @app.route('/status', methods=('GET', 'POST'))
 def status():
-    return V16.get_state()
+    return background_interface.get_state()
 
 @app.route('/commands', methods=('GET', 'POST'))
 def commands():
     if request.method == 'POST':
         data = request.get_json(force=True)
         command = command_ack(JSON=data)
-    return V16.put_command_get_ack(command)
+    return background_interface.put_command_get_ack(command)

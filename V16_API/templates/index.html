@@ -14,6 +14,7 @@
     </style>
 
 <script type="text/javascript" src="/static/control.js"></script>
+<script type="text/javascript" src="/static/input-number-format.jquery.js" /></script>
 
 {% endblock %}
 
@@ -33,7 +34,7 @@
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" id="primary_refresh"><span class="glyphicon glyphicon-refresh"></span></button>
                                     </span>
-                                    <input type="text" class="form-control text-center" value="127.0" id="primary_input">
+                                    <input type="text" class="form-control input-float text-center"  data-decimal="3" data-decimal-auto="3" value="127.000" id="primary_input">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" id="primary_submit"><span class="glyphicon glyphicon-ok"></span></button>
                                     </span>
@@ -56,7 +57,7 @@
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" id="standby_refresh"><span class="glyphicon glyphicon-refresh"></span></button>
                                     </span>
-                                    <input type="text" class="form-control text-center" value="127.0" id="standby_input">
+                                    <input type="text" class="form-control input-float text-center"  data-decimal="3" data-decimal-auto="3" value="127.000" id="standby_input">
                                     <span class="input-group-btn">
                                         <button class="btn btn-default" id="standby_submit"><span class="glyphicon glyphicon-ok"></span></button>
                                     </span>
@@ -73,11 +74,11 @@
                               <label for="squelchspinner">SQUELCH</label>
                               <div class="input-group number-spinner" id='squelchspinner'>
                                   <span class="input-group-btn">
-                                      <button class="btn btn-default" data-dir="dwn"><span class="glyphicon glyphicon-minus"></span></button>
+                                      <button class="btn btn-default" data-dir="dwn" id="squelch_dn"><span class="glyphicon glyphicon-minus"></span></button>
                                   </span>
-                                  <input type="text" class="form-control text-center" value="1">
+                                  <input type="text" class="form-control text-center" value="1" id="squelch" disabled>
                                   <span class="input-group-btn">
-                                      <button class="btn btn-default" data-dir="up"><span class="glyphicon glyphicon-plus"></span></button>
+                                      <button class="btn btn-default" data-dir="up" id="squelch_up"><span class="glyphicon glyphicon-plus"></span></button>
                                   </span>
                               </div>
                           </div>
@@ -110,6 +111,9 @@
             </div>
         </div>
     </div>
-        
+    
+    <script type="text/javascript">
+        $('.input-float').inputNumberFormat();
+    </script>    
 
 {% endblock %}

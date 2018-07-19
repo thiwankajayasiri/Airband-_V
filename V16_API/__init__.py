@@ -17,7 +17,7 @@ state = Queue(maxsize=1)  # State queue - Background->Flask
 background = Process(target=background_process, args=(commands, results, state))
 
 # Instantiate the inter-process interfaces (flask side)
-V16 = QueueManager(commands, results, state, background)
+background_interface = QueueManager(commands, results, state, background)
 
 # Instantiate the Flask App
 app = Flask(__name__)

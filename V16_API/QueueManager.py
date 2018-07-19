@@ -30,10 +30,12 @@ class QueueManager:
     
 class V16_State:
     def __init__(self):
-        self.success = "Hello World"
+        self.Connected = True
         self.PTTEnabled = False
         self.ScanEnabled = False
-        self.PrimaryFreq = 128.0
+        self.PrimaryFreq = 127.0
+        self.StandbyFreq = 127.0
+        self.Squelch = 1
         pass 
 
     def is_valid_state(self):
