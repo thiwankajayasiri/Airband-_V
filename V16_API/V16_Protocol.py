@@ -3,7 +3,7 @@ from V16_API.QueueManager import V16_State
 import serial, time, binascii, os, struct
 
 
-HOST = "198.18.15.41" 
+HOST = "198.18.15.45" 
 PORT = "20202" # Wave Relay Default
 URL = "rfc2217://" + HOST + ":" + PORT +"?logging=error"
 

@@ -60,7 +60,7 @@ def background_process(commands, results, queries):
             real_state = V16.update_real_state(real_state)
 
         # Fill in the state information for properties of the background task
-        real_state.connected = V16.stream.is_open
+        real_state.Connected = V16.stream.is_open
         real_state.PTTEnabled = ptt_enabled
         #real_state.ScanE0nabled = scan_enabled
 
