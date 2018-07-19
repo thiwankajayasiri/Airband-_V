@@ -29,8 +29,8 @@ class V16_Protocol:
         self.rx_volume = 0
         self.int_volume = 0
         self.squelch = 0
-        self.freq_active = 127.0
-        self.freq_stdby = 127.0
+        self.freq_active = 0.0
+        self.freq_stdby = 0.0
         self.tx_power = 0
         self.vswr = 0
         self.active_rx_db = 0
