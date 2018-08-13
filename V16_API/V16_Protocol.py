@@ -58,7 +58,7 @@ class V16_Protocol:
     def configure(self):
         self.set_scan(False)
         self.set_ptt(False)
-
+	self.set_int_volume(0)
     
     def pack_message(self, command, data):
         '''
@@ -85,7 +85,7 @@ class V16_Protocol:
         msg = self.pack_message(command, data)
         if msg is None:
             return False
-        #print(binascii.hexlify(msg).decode("ascii"))
+        print(binascii.hexlify(msg).decode("ascii"))
         self.stream.write(msg)
         return True
         
@@ -226,7 +226,10 @@ class V16_Protocol:
 
     def set_ptt(self, enabled=False):
         if self.stream.is_open:
-            return self.send_command(0x11,[enabled])
+            if enabled:
+		return self.send_command(0x0B,[0x01])
+	    else:
+		return self.send_command(0x0B,[0x00])
         return False
 
     def set_squelch(self, squelch):
@@ -236,12 +239,19 @@ class V16_Protocol:
         return False
 
     def request_playback(self):
-        if self.stream.is_open:
+	if self.stream.is_open:
             return self.send_command(0x09,[0x00])
         return False
 
-            
-        
+    def set_int_volume(self,volume):
+	if self.stream.is_open:
+	    return self.send_command(0x1C,[volume])            
+        return False
+
+    def set_rx_volume(self,volume):
+	if self.stream.isopen:
+	    return self.send_command(0x1F,[volume])
+	return False
         
 def int_to_bytes(val, num_bytes):
     return [(val & (0xff << pos*8)) >> pos*8 for pos in reversed(range(num_bytes))]
@@ -253,12 +263,11 @@ if __name__ == "__main__":
         time.sleep(1)
         print("Attempting Connection")
     print("Connection Successful")
-    
-    V16.send_command(0x08,[0x01])
-    V16.set_scan(False)
-    V16.set_squelch(16)
-    V16.set_frequency_MHz(119.1, primary=True)
-    V16.set_frequency_MHz(119.1)
+    V16.configure()
+    #V16.set_scan(False)
+    #V16.set_squelch(16)
+    #V16.set_frequency_MHz(119.1, primary=True)
+    #V16.set_frequency_MHz(119.1)
 
     while True:
        
